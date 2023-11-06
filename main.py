@@ -12,6 +12,13 @@ match input("wybor: "):
                 if line[-1] == "\n":
                     line = line[:-1]
                 data.append(line)
+
+        # with open("dane.txt", "r") as file:
+        #     processors = int(file.readline())
+        #     tasks = list(map(int, file.readlines()))
+
+        # print(processors, tasks)
+        #
         processors = int(data[0])
         tasks = [int(el) for el in data[1].split(" ")]
     case "2":

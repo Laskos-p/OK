@@ -9,7 +9,7 @@ def greedy(processors: int, tasks: list) -> tuple:
 
     :return: (dlugosc wykonywania procesow, czas wykonania, lista 2d z procesami na procesorach)
     """
-    proc = [0 for i in range(processors)]
+    proc = [0 for _ in range(processors)]
     start = time()
     while tasks:
         proc.sort()
