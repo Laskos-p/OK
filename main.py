@@ -7,37 +7,43 @@ print("2 - wprowadzanie danych z generatora")
 match input("wybor: "):
     case "1":
         data = []
-        with open("dane.txt", "r") as file:
-            for line in file:
-                if line[-1] == "\n":
-                    line = line[:-1]
-                data.append(line)
-
         # with open("dane.txt", "r") as file:
-        #     processors = int(file.readline())
-        #     tasks = list(map(int, file.readlines()))
+        #     for line in file:
+        #         if line[-1] == "\n":
+        #             line = line[:-1]
+        #         data.append(line)
 
-        # print(processors, tasks)
-        #
-        processors = int(data[0])
-        tasks = [int(el) for el in data[1].split(" ")]
+        with open("dane_pc.txt", "r") as file:
+            processors = int(file.readline())
+            tasks = list(map(int, file.readlines()))
+
+        print(processors, tasks)
+
+        # processors = int(data[0])
+        # tasks = [int(el) for el in data[1].split(" ")]
     case "2":
         processors = int(input("liczba procesorow: "))
         num_tasks = int(input("liczba zadan: "))
         task_min_time = int(input("minimalny czas trwania zadania: "))
         task_max_time = int(input("maksymalny czas trwania zadania: "))
 
+        # tasks = RandomList(num_tasks, task_min_time, task_max_time)
         tasks = generate(
             num_tasks,
             task_min_time,
             task_max_time
         )
 
+        with open("dane_z_generatora", "w") as f:
+            f.write(str(processors) + "\n")
+            for task in tasks:
+                f.write(str(task) + "\n")
 
 print("1 - algorytm zachlanny")
 print("2 - ")
 match input("wybor: "):
     case "1":
+        # print(tasks.tasks)
         processor_time, execution_time, proc_list = greedy(processors, tasks.copy())
         print("czas wykonania:", execution_time, "s")
         print("najdłuższy czas wykorzystania procesora:", processor_time)
