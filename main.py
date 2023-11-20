@@ -13,8 +13,9 @@ match input("wybor: "):
         #             line = line[:-1]
         #         data.append(line)
 
-        with open("dane_pc.txt", "r") as file:
+        with open("instance2.txt", "r") as file:
             processors = int(file.readline())
+            _ = int(file.readline())
             tasks = list(map(int, file.readlines()))
 
         print(processors, tasks)
@@ -34,8 +35,9 @@ match input("wybor: "):
             task_max_time
         )
 
-        with open("dane_z_generatora", "w") as f:
+        with open("generator", "w") as f:
             f.write(str(processors) + "\n")
+            f.write(str(num_tasks) + "\n")
             for task in tasks:
                 f.write(str(task) + "\n")
 
