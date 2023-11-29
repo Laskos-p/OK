@@ -42,32 +42,15 @@ match input("wybor: "):
                 f.write(str(task) + "\n")
 
 print("1 - algorytm zachlanny")
-print("2 - ")
+print("2 - algorytm tabu")
 match input("wybor: "):
     case "1":
         # print(tasks.tasks)
         processor_time, execution_time, proc_list = greedy(processors, tasks.copy())
         print("czas wykonania:", execution_time, "s")
         print("najdłuższy czas wykorzystania procesora:", processor_time)
-        print("czas wykorzystania procesorów:", proc_list)
+        print("czas wykorzystania procesorów:", *proc_list, sep='\n')
 
     case "2":
-        exit(0)
-
-
-# print(processors, tasks)
-#
-# proc = [1 for i in range(processors)]
-# t = 0
-#
-# while proc != [0]*processors:
-#     for i in range(processors):
-#         if proc[i] > 0:
-#             proc[i] -= 1
-#         if proc[i] == 0 and tasks != []:
-#             proc[i] += tasks[0]
-#             tasks.pop(0)
-#     print("w chwili t = ", t, proc, tasks)
-#     t += 1
-#
-# print("zakonczono przydzial procesow w czasie t = ", t)
+        tabu_solution = tabu_search(processors, tasks, 100, 10)
+        print("Tabu solution:", *tabu_solution, sep="\n")
