@@ -12,8 +12,8 @@ match input("wybor: "):
         #         if line[-1] == "\n":
         #             line = line[:-1]
         #         data.append(line)
-
-        with open("instance2.txt", "r") as file:
+        file_name = input("Podaj nazwę pliku z rozszerzeniem: ")
+        with open(file_name, "r") as file:
             processors = int(file.readline())
             _ = int(file.readline())
             tasks = list(map(int, file.readlines()))
@@ -52,5 +52,13 @@ match input("wybor: "):
         print("czas wykorzystania procesorów:", *proc_list, sep='\n')
 
     case "2":
-        tabu_solution = tabu_search(processors, tasks, 100, 10)
-        print("Tabu solution:", *tabu_solution, sep="\n")
+        iterations = int(input("Podaj liczbę iteracji: "))
+        tabu_list_size = int(input("Podaj długość listy tabu: "))
+        tabu_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time = tabu_search(processors, tasks, iterations, tabu_list_size)
+        # print all scheduled task
+        # print("Tabu solution:", *tabu_solution, sep="\n")
+        print("Longest task: ", max(tabu_solution, key=lambda x: x[0]))
+        print("Time to generate initial solution: ", greedy_scheduling_time)
+        print("Time to find spent to find all neighbours: ", full_neighbour_fining_time)
+        print("Time taken by tabu algorithm: ", tabu_algorithm_time - full_neighbour_fining_time)
+        print("Time taken to find solution: ", greedy_scheduling_time + full_neighbour_fining_time + tabu_algorithm_time)

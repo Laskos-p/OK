@@ -35,6 +35,7 @@ def objective_function(proc_list):
 
 
 def get_neighbors(solution):
+    start = time()
     neighbors = []
     solution.sort(key=lambda x: x[0], reverse=True)
 
@@ -47,7 +48,7 @@ def get_neighbors(solution):
         # for every other processor get its length and task list
         for j, [processor_length, other_processor_tasks] in enumerate(solution[1:], start=1):
             # if processor have the same length as longest processor go to next processor
-            if processor_length < longest_processor:
+            if processor_length + 1 < longest_processor:
                 # for every task in that processor check if it's shorter than the longest processor task
                 for k, other_processor_task in enumerate(other_processor_tasks):
                     if other_processor_task >= longest_processor_task:
@@ -63,7 +64,7 @@ def get_neighbors(solution):
 
                     neighbors.append(neighbor)
 
-    return neighbors
+    return time()-start, neighbors
 
 
 def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_size: int):
@@ -76,15 +77,18 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     :return: (dlugosc wykonywania procesow, czas wykonania, lista 2d z procesami na procesorach)
     """
     # generate initial solution using greedy algorith with reverse sorting of tasks
-    initial_solution = greedy(processors, tasks, pre_sort=True)[2]
+    greedy_scheduling_time, initial_solution = greedy(processors, tasks, pre_sort=True)[1:]
     print("Initial solution:")
     print(*initial_solution, sep="\n")
     best_solution = initial_solution
     current_solution = initial_solution
     tabu_list = []
+    full_neighbour_fining_time = 0
 
+    start = time()
     for _ in range(max_iterations):
-        neighbors = get_neighbors(current_solution)
+        neighbor_finding_time, neighbors = get_neighbors(current_solution)
+        full_neighbour_fining_time += neighbor_finding_time
         best_neighbor = None
         best_neighbor_fitness = float('inf')
 
@@ -112,4 +116,6 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             # current neighbor is better
             best_solution = best_neighbor
 
-    return best_solution
+    tabu_algorithm_time = time() - start
+
+    return best_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time
