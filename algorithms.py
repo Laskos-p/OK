@@ -83,7 +83,7 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     best_solution = initial_solution
     current_solution = initial_solution
     tabu_list = []
-    full_neighbour_fining_time = 0
+    full_neighbour_finding_time = 0
 
     start = time()
     for _ in range(max_iterations):
