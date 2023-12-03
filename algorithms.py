@@ -88,7 +88,7 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     start = time()
     for _ in range(max_iterations):
         neighbor_finding_time, neighbors = get_neighbors(current_solution)
-        full_neighbour_fining_time += neighbor_finding_time
+        full_neighbour_finding_time += neighbor_finding_time
         best_neighbor = None
         best_neighbor_fitness = float('inf')
 
@@ -118,4 +118,4 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
 
     tabu_algorithm_time = time() - start
 
-    return best_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time
+    return best_solution, greedy_scheduling_time, full_neighbour_finding_time, tabu_algorithm_time
