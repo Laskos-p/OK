@@ -28,13 +28,15 @@ def visualize_schedule(schedule):
 def instances_are_equal(neighbor, tabu_list):
     # print("Neighbor:", *neighbor, sep="\n")
     # print("Tabu list:", *tabu_list, sep="\n")
-    for tabu_solution in tabu_list:
-        equalities = 0
-        for neighbor_solution in neighbor:
-            if neighbor_solution in tabu_solution:
-                equalities += 1
-
-        if equalities == len(neighbor):
-            return True
+    if sorted(neighbor) in tabu_list:
+        return True
+    # for tabu_solution in tabu_list:
+    #     equalities = 0
+    #     for neighbor_solution in neighbor:
+    #         if neighbor_solution in tabu_solution:
+    #             equalities += 1
+    #
+    #     if equalities == len(neighbor):
+    #         return True
 
     return False

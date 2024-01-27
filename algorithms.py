@@ -1,7 +1,12 @@
-from time import time
+import math
+from time import time, time_ns
 from copy import deepcopy
+
+import algorithms
 # from collections import defaultdict
 from utils import visualize_schedule, instances_are_equal
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Pool, cpu_count
 
 
 def greedy(processors: int, tasks: list, pre_sort: bool = False) -> tuple:
@@ -32,60 +37,112 @@ def greedy(processors: int, tasks: list, pre_sort: bool = False) -> tuple:
 
 def objective_function(proc_list):
     # evaluate quality of solution
-    longest_processor = max(proc_list, key=lambda x: x[0])[0]
+    proc_list.sort(key=lambda x: x[0])
+    longest_processor = max(proc_list)[0]
     longest_processors = len([processor for processor in proc_list if processor[0] == longest_processor])
+    difference = longest_processor - proc_list[0][0]
+    lowest_task = min(proc_list[-1][1])
     # return max(proc_list, key=lambda x: x[0])[0]
-    optimal_length_processors = len([processor for processor in proc_list if processor[0] == 977])
-    return (longest_processor, longest_processors, -optimal_length_processors)
+    # optimal_length_processors = len([processor for processor in proc_list if processor[0] == 3458])
+    # return longest_processor, longest_processors, -difference, -optimal_length_processors
 
+    return longest_processor, longest_processors, -difference, lowest_task
+
+# def get_neighbor(i, solution):
+#     neighbors = []
+#     for j, [processor_length, other_processor_tasks] in enumerate(solution[1:], start=1):
+#         # if processor have the same length as longest processor go to next processor
+#         # for every task in that processor check if it's shorter than the longest processor task
+#         neighbor = deepcopy(solution)
+#         task = neighbor[0][1].pop(i)
+#         neighbor[j][1].append(task)
+#         # neighbor[0][1].sort(reverse=True)
+#         neighbor[j][1].sort(reverse=True)
+#         #     # update processor length
+#         neighbor[0][0] -= task
+#         neighbor[j][0] += task
+#
+#         neighbors.append(neighbor)
+#         for k, other_processor_task in enumerate(other_processor_tasks):
+#             neighbor = deepcopy(solution)
+#             difference = neighbor[0][1][i] - neighbor[j][1][k]
+#             neighbor[0][1][i], neighbor[j][1][k] = neighbor[j][1][k], neighbor[0][1][i]
+#
+#             neighbor[0][1].sort(reverse=True)
+#             neighbor[j][1].sort(reverse=True)
+#             # update processor length
+#             neighbor[0][0] -= difference
+#             neighbor[j][0] += difference
+#
+#             neighbors.append(neighbor)
+#
+#     return neighbors
 def get_neighbors(solution):
     start = time()
     neighbors = []
     solution.sort(key=lambda x: x[0], reverse=True)
 
+    # with Pool(cpu_count()) as p:
+    #     for i in range(len(solution[0][1])):
+    #         neighbors.append(p.apply(algorithms.get_neighbor, args=(i, solution)))
+    # with ThreadPoolExecutor(max_workers=12) as executor:
+    #     for i in range(len(solution[0][1])):
+    #         executor.submit(get_neighbor, i, solution, neighbors)
+
     # for every task in the longest process
     # swap it with every task in every other process that will make the longest process shorter
     # and the other process not longer than the longest process
-    longest_processor = solution[0][0]
-    # get one task from the longest processor
+    # longest_processor = solution[0][0]
+    # # get one task from the longest processor
     for i, longest_processor_task in enumerate(solution[0][1]):
         # for every other processor get its length and task list
         for j, [processor_length, other_processor_tasks] in enumerate(solution[1:], start=1):
             # if processor have the same length as longest processor go to next processor
             # for every task in that processor check if it's shorter than the longest processor task
+            neighbor = deepcopy(solution)
+            task = neighbor[0][1].pop(i)
+            neighbor[j][1].append(task)
+            # neighbor[0][1].sort(reverse=True)
+            neighbor[j][1].sort(reverse=True)
+            #     # update processor length
+            neighbor[0][0] -= task
+            neighbor[j][0] += task
+
+            neighbors.append(neighbor)
             for k, other_processor_task in enumerate(other_processor_tasks):
                 neighbor = deepcopy(solution)
+                difference = neighbor[0][1][i] - neighbor[j][1][k]
                 neighbor[0][1][i], neighbor[j][1][k] = neighbor[j][1][k], neighbor[0][1][i]
 
                 neighbor[0][1].sort(reverse=True)
                 neighbor[j][1].sort(reverse=True)
                 # update processor length
-                neighbor[0][0] = sum(neighbor[0][1])
-                neighbor[j][0] = sum(neighbor[j][1])
+                neighbor[0][0] -= difference
+                neighbor[j][0] += difference
 
                 neighbors.append(neighbor)
-
-                for l in range(k+1, len(other_processor_tasks)):
-                    # swap tasks
-                    neighbor = deepcopy(solution)
-                    neighbor[0][1].append(neighbor[j][1][k])
-                    neighbor[0][1].append(neighbor[j][1][l])
-                    neighbor[j][1].pop(l)
-                    neighbor[j][1].pop(k)
-
-                    neighbor[j][1].append(neighbor[0][1][i])
-                    neighbor[0][1].pop(i)
-                    #
-                    # neighbor[0][1][i], neighbor[j][1][k] = neighbor[j][1][k]+neighbor[j][1][l], neighbor[0][1][i]
-                    # neighbor[j][1].pop(l)
-
-                    neighbor[0][1].sort(reverse=True)
-                    neighbor[j][1].sort(reverse=True)
-                    # update processor length
-                    neighbor[0][0] = sum(neighbor[0][1])
-                    neighbor[j][0] = sum(neighbor[j][1])
-
-                    neighbors.append(neighbor)
+            #
+            #     for l in range(k+1, len(other_processor_tasks)):
+            #         # swap tasks
+            #         neighbor = deepcopy(solution)
+            #         neighbor[0][1].append(neighbor[j][1][k])
+            #         neighbor[0][1].append(neighbor[j][1][l])
+            #         neighbor[j][1].pop(l)
+            #         neighbor[j][1].pop(k)
+            #
+            #         neighbor[j][1].append(neighbor[0][1][i])
+            #         neighbor[0][1].pop(i)
+            #         #
+            #         # neighbor[0][1][i], neighbor[j][1][k] = neighbor[j][1][k]+neighbor[j][1][l], neighbor[0][1][i]
+            #         # neighbor[j][1].pop(l)
+            #
+            #         neighbor[0][1].sort(reverse=True)
+            #         neighbor[j][1].sort(reverse=True)
+            #         # update processor length
+            #         neighbor[0][0] = sum(neighbor[0][1])
+            #         neighbor[j][0] = sum(neighbor[j][1])
+            #
+            #         neighbors.append(neighbor)
 
     # best algorithm so far
     # longest_processor = solution[0][0]
@@ -136,7 +193,7 @@ def get_neighbors(solution):
     return time()-start, neighbors
 
 
-def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_size: int, draw: bool = False):
+def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_size: int, time_limit: int = 60*5, draw: bool = False):
     """
     Algorym Tabu
     :param processors: liczba procesorow
@@ -146,6 +203,7 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     :return: (dlugosc wykonywania procesow, czas wykonania, lista 2d z procesami na procesorach)
     """
     # generate initial solution using greedy algorith with reverse sorting of tasks
+    optimum = int(math.ceil(sum(tasks) / processors))
     greedy_scheduling_time, initial_solution = greedy(processors, tasks, pre_sort=True)[1:]
     print("Initial solution:")
     print(*initial_solution, sep="\n")
@@ -154,17 +212,21 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     tabu_list = []
     full_neighbour_finding_time = 0
 
+
+    print("Optimum: ", optimum)
     # visualize_schedule(initial_solution)
     start = time()
     for iteration in range(max_iterations):
-        print("generating neighbors")
+        # print("generating neighbors")
+        # start_generation = time()
         neighbor_finding_time, neighbors = get_neighbors(current_solution)
+        # print("generated neighbors in", time()-start_generation, "s")
         if draw:
             visualize_schedule(current_solution)
             print("generated plot")
         full_neighbour_finding_time += neighbor_finding_time
         best_neighbor = None
-        best_neighbor_fitness = (float('inf'), float('inf'), float('inf'))
+        best_neighbor_fitness = (float('inf'), float('inf'), float('inf'), float('inf'))
 
         for neighbor in neighbors:
             if not instances_are_equal(neighbor, tabu_list):
@@ -173,9 +235,6 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
                     best_neighbor = neighbor
                     best_neighbor_fitness = neighbor_fitness
 
-            else:
-                print("instance already in tabu list")
-
         if best_neighbor is None:
             # No non-tabu neighbors found,
             # terminate the search
@@ -183,7 +242,7 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             break
 
         current_solution = best_neighbor
-        tabu_list.append(best_neighbor)
+        tabu_list.append(sorted(best_neighbor))
         # if instances_are_equal(tabu_list[0], tabu_list[1:]):
         #     print("Something went wrong")
         if len(tabu_list) > tabu_list_size:
@@ -199,6 +258,13 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             print("Found better solution: {}", objective_function(best_neighbor))
             best_solution = best_neighbor
 
+        if time() - start > time_limit:
+            print("Time limit reached, time: ", time() - start, "s")
+            break
+
+        if objective_function(best_solution)[0] == optimum:
+            print("Found optimum: ", objective_function(best_solution)[0], "in iteration: ", iteration)
+            break
     tabu_algorithm_time = time() - start
 
     return best_solution, greedy_scheduling_time, full_neighbour_finding_time, tabu_algorithm_time
