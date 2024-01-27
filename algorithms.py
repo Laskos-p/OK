@@ -48,6 +48,7 @@ def objective_function(proc_list):
 
     return longest_processor, longest_processors, -difference, lowest_task
 
+
 # def get_neighbor(i, solution):
 #     neighbors = []
 #     for j, [processor_length, other_processor_tasks] in enumerate(solution[1:], start=1):
@@ -77,7 +78,7 @@ def objective_function(proc_list):
 #             neighbors.append(neighbor)
 #
 #     return neighbors
-def get_neighbors(solution):
+def get_neighbors(solution, i):
     start = time()
     neighbors = []
     solution.sort(key=lambda x: x[0], reverse=True)
@@ -94,7 +95,8 @@ def get_neighbors(solution):
     # and the other process not longer than the longest process
     # longest_processor = solution[0][0]
     # # get one task from the longest processor
-    for i, longest_processor_task in enumerate(solution[0][1]):
+    # for i, longest_processor_task in enumerate(solution[0][1]):
+    for _ in range(1):
         # for every other processor get its length and task list
         for j, [processor_length, other_processor_tasks] in enumerate(solution[1:], start=1):
             # if processor have the same length as longest processor go to next processor
@@ -190,10 +192,11 @@ def get_neighbors(solution):
     #
     #         neighbors.append(neighbor)
 
-    return time()-start, neighbors
+    return time() - start, neighbors
 
 
-def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_size: int, time_limit: int = 60*5, draw: bool = False):
+def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_size: int, time_limit: int = 60 * 5,
+                draw: bool = False):
     """
     Algorym Tabu
     :param processors: liczba procesorow
@@ -212,29 +215,40 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
     tabu_list = []
     full_neighbour_finding_time = 0
 
-
     print("Optimum: ", optimum)
     # visualize_schedule(initial_solution)
     start = time()
     for iteration in range(max_iterations):
         # print("generating neighbors")
         # start_generation = time()
-        neighbor_finding_time, neighbors = get_neighbors(current_solution)
         # print("generated neighbors in", time()-start_generation, "s")
         if draw:
             visualize_schedule(current_solution)
             print("generated plot")
-        full_neighbour_finding_time += neighbor_finding_time
+        fitness_best_solution = objective_function(best_solution)
         best_neighbor = None
         best_neighbor_fitness = (float('inf'), float('inf'), float('inf'), float('inf'))
+        current_solution.sort(key=lambda x: x[0], reverse=True)
+        for i in range(len(current_solution[0][1])):
+            neighbor_finding_time, neighbors = get_neighbors(current_solution, i)
+            full_neighbour_finding_time += neighbor_finding_time
+            for neighbor in neighbors:
+                if not instances_are_equal(neighbor, tabu_list):
+                    neighbor_fitness = objective_function(neighbor)
+                    if neighbor_fitness < best_neighbor_fitness:
+                        best_neighbor = neighbor
+                        best_neighbor_fitness = neighbor_fitness
 
-        for neighbor in neighbors:
-            if not instances_are_equal(neighbor, tabu_list):
-                neighbor_fitness = objective_function(neighbor)
-                if neighbor_fitness < best_neighbor_fitness:
-                    best_neighbor = neighbor
-                    best_neighbor_fitness = neighbor_fitness
+                    if neighbor_fitness[0] < fitness_best_solution[0] or \
+                            neighbor_fitness[0] == fitness_best_solution[0] and \
+                            neighbor_fitness[1] < fitness_best_solution[1]:
+                        print("skipped")
+                        break
+            else:
+                continue
+            break
 
+        # print("skipped")
         if best_neighbor is None:
             # No non-tabu neighbors found,
             # terminate the search
@@ -250,7 +264,8 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             # tabu list if it exceeds the size
             tabu_list.pop(0)
 
-        print("Current best neighbor: ", objective_function(best_neighbor), "Current best solution: ", objective_function(best_solution))
+        print("Current best neighbor: ", objective_function(best_neighbor), "Current best solution: ",
+              objective_function(best_solution))
         print("Current iteration: ", iteration)
         if objective_function(best_neighbor) < objective_function(best_solution):
             # Update the best solution if the
@@ -258,13 +273,13 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             print("Found better solution: {}", objective_function(best_neighbor))
             best_solution = best_neighbor
 
-        if time() - start > time_limit:
-            print("Time limit reached, time: ", time() - start, "s")
-            break
-
-        if objective_function(best_solution)[0] == optimum:
-            print("Found optimum: ", objective_function(best_solution)[0], "in iteration: ", iteration)
-            break
+        # if time() - start > time_limit:
+        #     print("Time limit reached, time: ", time() - start, "s")
+        #     break
+        #
+        # if objective_function(best_solution)[0] == optimum:
+        #     print("Found optimum: ", objective_function(best_solution)[0], "in iteration: ", iteration)
+        #     break
     tabu_algorithm_time = time() - start
 
     return best_solution, greedy_scheduling_time, full_neighbour_finding_time, tabu_algorithm_time

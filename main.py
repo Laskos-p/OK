@@ -56,24 +56,25 @@ match input("wybor: "):
     case "2":
         iterations = int(input("Podaj liczbę iteracji: "))
         tabu_list_size = int(input("Podaj długość listy tabu: "))
-        tabu_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time = tabu_search(processors, tasks, iterations, tabu_list_size)
-        # print all scheduled task
-        print("Tabu solution:", *tabu_solution, sep="\n")
-        print("Longest task: ", max(tabu_solution, key=lambda x: x[0]))
-        print("Time to generate initial solution: ", greedy_scheduling_time)
-        print("Time to find spent to find all neighbours: ", full_neighbour_fining_time)
-        print("Time taken by tabu algorithm: ", tabu_algorithm_time - full_neighbour_fining_time)
-        print("Time taken to find solution: ", greedy_scheduling_time + full_neighbour_fining_time + tabu_algorithm_time)
-    case "3":
-        pass
-    case "4":
-        iterations = int(input("Podaj liczbę iteracji: "))
-        tabu_list_size = int(input("Podaj długość listy tabu: "))
-        tabu_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time = tabu_search(processors, tasks, iterations, tabu_list_size, draw=True)
+        check_tasks = sorted(tasks.copy())
+
+        tasks_sum = sum(tasks)
+
+        tabu_solution, greedy_scheduling_time, full_neighbour_fining_time, tabu_algorithm_time = tabu_search(processors,
+                                                                                                             tasks,
+                                                                                                             iterations,
+                                                                                                             tabu_list_size,
+                                                                                                             draw=False)
         # print all scheduled task
         # print("Tabu solution:", *tabu_solution, sep="\n")
         print("Longest task: ", max(tabu_solution, key=lambda x: x[0]))
         print("Time to generate initial solution: ", greedy_scheduling_time)
         print("Time to find spent to find all neighbours: ", full_neighbour_fining_time)
         print("Time taken by tabu algorithm: ", tabu_algorithm_time - full_neighbour_fining_time)
-        print("Time taken to find solution: ", greedy_scheduling_time + full_neighbour_fining_time + tabu_algorithm_time)
+        print("Time taken to find solution: ", greedy_scheduling_time + tabu_algorithm_time)
+
+        print("Verifying solution...")
+        tabu_tasks = [task for process in tabu_solution for task in process[1]]
+        # print(tabu_tasks)
+        print(sorted(tabu_tasks) == check_tasks)
+        # print("Check if all tasks are present in solution", all(task in [x[1] for ] for task in check_tasks))
