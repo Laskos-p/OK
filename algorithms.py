@@ -273,13 +273,13 @@ def tabu_search(processors: int, tasks: list, max_iterations: int, tabu_list_siz
             print("Found better solution: {}", objective_function(best_neighbor))
             best_solution = best_neighbor
 
-        # if time() - start > time_limit:
-        #     print("Time limit reached, time: ", time() - start, "s")
-        #     break
-        #
-        # if objective_function(best_solution)[0] == optimum:
-        #     print("Found optimum: ", objective_function(best_solution)[0], "in iteration: ", iteration)
-        #     break
+        if time() - start > time_limit:
+            print("Time limit reached, time: ", time() - start, "s")
+            break
+
+        if objective_function(best_solution)[0] == optimum:
+            print("Found optimum: ", objective_function(best_solution)[0], "in iteration: ", iteration)
+            break
     tabu_algorithm_time = time() - start
 
     return best_solution, greedy_scheduling_time, full_neighbour_finding_time, tabu_algorithm_time
